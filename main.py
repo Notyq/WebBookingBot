@@ -6,6 +6,7 @@ import undetected_chromedriver as uc
 from selenium.common.exceptions import ElementNotInteractableException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import UnexpectedAlertPresentException
+from selenium.common.exceptions import ElementClickInterceptedException
 import datetime
 import time
 
@@ -24,12 +25,12 @@ courts = [1]
 total_time_slots = ["7am", "8am", "9am", "10am", "11am", "12pm",
                     "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm"]
 # total_time_slots = ["9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm"]
-time_slots = ["7am", "8am"]
+time_slots = ["8pm", "9pm"]
 # Only badminton @ bedok heartbeat for now (1181 - bukit canberra, 895 - bedok heartbeat, 560 - northland secondary school)
 activity_id = 18
 venue_id = 1181
 now = datetime.datetime.now()
-d = datetime.timedelta(days=16)
+d = datetime.timedelta(days=15)
 time_stamp = int((now + d).timestamp())
 
 
@@ -80,24 +81,29 @@ params = {
 url = url.format(**params)
 driver.get(url)
 print(url)
-time.sleep(2)
 
 
-wait.until(EC.element_to_be_clickable(
-    (By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[1]/div/a"))).click()
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[1]/div/div/ul/li[2]").click()
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[2]/div/a/span").click()
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[2]/div/div/ul/li[13]").click()
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[3]/input").click()
-driver.find_element(
-    By.XPATH, "/html/body/div[4]/table/tbody/tr[4]/td[5]").click()
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[4]/input").click()
-
+while True:
+    try:
+        driver.find_element(
+            By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[3]/input").click()
+        driver.find_element(
+            By.XPATH, "/html/body/div[4]/table/tbody/tr[4]/td[6]/span").click()   # <----- !!!calender first
+        driver.find_element(
+            (By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[1]/div/a")).click()
+        driver.find_element(
+            By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[1]/div/div/ul/li[2]").click()
+        driver.find_element(
+            By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[2]/div/a/span").click()
+        driver.find_element(
+            By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[2]/div/div/ul/li[13]").click()
+        driver.find_element(
+            By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[4]/input").click()        
+        break
+    except (ElementClickInterceptedException) as e:
+        print("Courts not released, refreshing page...")
+        driver.refresh()
+        time.sleep(2)
 
 # refresh till bookings selected
 while True:
@@ -143,7 +149,7 @@ except UnexpectedAlertPresentException:
 #TOC bs check
 # wait.until(EC.element_to_be_clickable(
 #     (By.XPATH, "/html/body/div[9]/div/div/div[2]/button")))
-# driver.find_element(
+# driver.find_element(  
 #     By.XPATH, "/html/body/div[9]/div/div/div[2]/button").click()
 # time.sleep(10)
 
