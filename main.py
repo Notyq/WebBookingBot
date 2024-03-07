@@ -12,6 +12,7 @@ import time
 
 # leave window open when done
 options = Options()
+options.add_argument('--user-data-dir=C:\\Users\\user\\AppData\\Local\\Google\\Chrome\\User Data\\Default')
 options.add_experimental_option("detach", True)
 driver = uc.Chrome()
 
@@ -21,7 +22,7 @@ password = "t0404934e"
 
 # *** CUSTOMIZE BOOKING HERE ***
 total_courts = [1, 2, 3, 4, 5, 6, 7, 8]
-courts = [1]
+courts = [4]
 total_time_slots = ["7am", "8am", "9am", "10am", "11am", "12pm",
                     "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm"]
 # total_time_slots = ["9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm"]
@@ -71,6 +72,7 @@ wait.until(EC.element_to_be_clickable(
     (By.XPATH, "/html/body/div[3]/main/div[3]/div/div[1]/div/p/a")))
 # url = (
 #     'https://members.myactivesg.com/facilities/view/activity/{activity_id}/venue/{venue_id}?time_from={time}')
+
 url = (
     'https://members.myactivesg.com/facilities/quick-booking')
 params = {
@@ -82,49 +84,62 @@ url = url.format(**params)
 driver.get(url)
 print(url)
 
-
 while True:
     try:
         driver.find_element(
             By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[3]/input").click()
         driver.find_element(
-            By.XPATH, "/html/body/div[4]/table/tbody/tr[4]/td[6]/span").click()   # <----- !!!calender first
+            By.XPATH, "/html/body/div[4]/table/tbody/tr[4]/td[6]/a").click()   # <----- !!!calender first
         driver.find_element(
-            (By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[1]/div/a")).click()
+            By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[1]/div/a/span").click()
+        # driver.find_element(
+        #     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[1]/div/div/div/input").send_keys("Badminton")
         driver.find_element(
             By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[1]/div/div/ul/li[2]").click()
         driver.find_element(
             By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[2]/div/a/span").click()
+        # driver.find_element(
+        #     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[2]/div/div/div/input").send_keys("Bukit Canberra Sport Hall")
         driver.find_element(
             By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[2]/div/div/ul/li[13]").click()
         driver.find_element(
-            By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[4]/input").click()        
+            By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div/form/fieldset[4]/input").click()
+        driver.find_element(
+            By.XPATH, "/html/body/div[2]/div[3]/div[2]/div/label").click()   # captcha!!!!!!!!
+        
+        
+        time.sleep(60)
+
+        # select_bookings()
+        # driver.find_element(
+        #     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[4]/div/div[1]/form/div[2]/div/input").click()
+        # print("Added to cart")
         break
-    except (ElementClickInterceptedException) as e:
-        print("Courts not released, refreshing page...")
+    except (NoSuchElementException, ElementClickInterceptedException) as e:
+        print("Courts not released, refreshing page... for debugging: " + str(e))
         driver.refresh()
         time.sleep(2)
 
-# refresh till bookings selected
-while True:
-    try:
-        select_bookings()
-        driver.find_element(By.ID, "addtocartbtn").click()
-        break
-    except (ElementNotInteractableException, NoSuchElementException) as e:
-        print("Bookings not found, refreshing page...")
-        driver.refresh()
-        time.sleep(2)
+# # refresh till bookings selected
+# while True:
+#     try:
+#         select_bookings()
+#         driver.find_element(By.ID, "addtocartbtn").click()
+#         break
+#     except (ElementNotInteractableException, NoSuchElementException) as e:
+#         print("Bookings not found, refreshing page...")
+#         driver.refresh()
+#         time.sleep(2)
 
-# get past speed detector
-print("Bookings found!")
+# # get past speed detector
+# print("Bookings found!")
 # time.sleep(2)
 # ok = driver.find_element(By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[4]/div/div[1]/form/div[2]/div/input")
 # driver.execute_script("arguments[0].click();", ok)
 # time.sleep(1)
 # print("Speed detector bypassed")
 
-# # actual add to cart
+# # # actual add to cart
 # select_bookings()
 # time.sleep(1)
 # select_bookings()
@@ -135,23 +150,24 @@ print("Bookings found!")
 #     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[3]/div[4]/div/form/div[2]/div/input").click()
 # if UnexpectedAlertPresentException:
 #     time.sleep(100)
-print("Added to cart")
 
 
 try:
-    wait.until(EC.element_to_be_clickable(
-        (By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[4]/div/div[1]/form/div[2]/div/input"))).click()
+    select_bookings()
+    driver.find_element(
+        By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[4]/div/div[1]/form/div[2]/div/input").click()
+    time.sleep(2)
 except UnexpectedAlertPresentException:
     cart_url = "https://members.myactivesg.com/cart"
     driver.get(cart_url)
     print("unexpectedAlertException: Proceeding to cart")
 
 #TOC bs check
-# wait.until(EC.element_to_be_clickable(
-#     (By.XPATH, "/html/body/div[9]/div/div/div[2]/button")))
-# driver.find_element(  
-#     By.XPATH, "/html/body/div[9]/div/div/div[2]/button").click()
-# time.sleep(10)
+wait.until(EC.element_to_be_clickable(
+    (By.XPATH, "/html/body/div[9]/div/div/div[2]/button")))
+driver.find_element(  
+    By.XPATH, "/html/body/div[9]/div/div/div[2]/button").click()
+time.sleep(10)
 
 # # select debit
 # driver.find_element(
@@ -161,18 +177,18 @@ except UnexpectedAlertPresentException:
 # driver.find_element(
 #     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[2]/div/div/input").click()
 
-# enter pin
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("0")
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("4")
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("0")
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("4")
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("9")
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("3")
-driver.find_element(
-    By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[2]/div/div/input").click()
+# # enter pin
+# driver.find_element(
+#     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("0")
+# driver.find_element(
+#     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("4")
+# driver.find_element(
+#     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("0")
+# driver.find_element(
+#     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("4")
+# driver.find_element(
+#     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("9")
+# driver.find_element(
+#     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[1]/div/div/div[1]/input[1]").sendkeys("3")
+# driver.find_element(
+#     By.XPATH, "/html/body/div[3]/main/div[3]/div/article/section[2]/form/div[2]/div/div/input").click()
